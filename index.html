@@ -17,8 +17,8 @@ html, body {
 .liquid-glass-pure {
   --r: 28px;            /* corner radius: set to half the height for a pill */
   --a: 135deg;          /* light direction, follows your finger */
-  --fill: .8;           /* how solid the red is: 1 = like the photo, 0.5 = clearer glass */
-  --glow: .8;           /* strength of the red glow inside the edge */
+  --fill: 1;            /* how solid the red is: 1.3 deeper, 0.6 clearer glass */
+  --glow: 1;            /* strength of the red glow inside the edge */
 
   position: relative;
   display: block;
@@ -39,18 +39,19 @@ html, body {
   -webkit-mask-image: -webkit-radial-gradient(white, black);
 
   /* red glass: lighter at the top left, deep crimson at the bottom, still see-through */
-  background: linear-gradient(160deg,
-    rgba(215,45,65,calc(.5 * var(--fill))) 0%,
-    rgba(150,25,42,calc(.58 * var(--fill))) 55%,
-    rgba(95,12,26,calc(.66 * var(--fill))) 100%);
+  background: linear-gradient(165deg,
+    rgba(255,110,130,calc(.22 * var(--fill))) 0%,
+    rgba(200,40,65,calc(.42 * var(--fill))) 45%,
+    rgba(120,14,34,calc(.58 * var(--fill))) 100%);
 
   backdrop-filter: blur(5px) saturate(150%);
   -webkit-backdrop-filter: blur(5px) saturate(150%);
 
   box-shadow:
-    inset 0 0 0 .5px rgba(255,150,160,.22),
-    inset 0 0 8px 0 rgba(255,70,95,calc(.3 * var(--glow))),
-    inset 0 3px 4px -3px rgba(255,215,220,.4);
+    inset 0 0 0 .5px rgba(255,170,180,.2),
+    inset 0 2px 3px -1px rgba(255,225,230,.45),
+    inset 0 -7px 9px -6px rgba(70,0,18,.45),
+    inset 0 0 10px 0 rgba(255,80,105,calc(.22 * var(--glow)));
 
   transition: transform .5s cubic-bezier(.34,1.7,.5,1);
   touch-action: manipulation;
@@ -82,10 +83,10 @@ html, body {
   padding: 1.2px;
   pointer-events: none;
   background: linear-gradient(var(--a),
-    rgba(255,230,232,1),
-    rgba(255,110,125,.2) 30%,
-    rgba(255,110,125,.2) 68%,
-    rgba(255,190,198,.85));
+    rgba(255,235,238,1),
+    rgba(255,120,135,.1) 26%,
+    rgba(255,120,135,.1) 70%,
+    rgba(255,200,206,.8));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
@@ -94,7 +95,7 @@ html, body {
   .liquid-glass-pure::after { display: none; }
 }
 
-/* the glossy details from the photo: raised inner pane, slanted glare panels, shine on the top-left curve */
+/* glossy details: a soft top glow, two slanted glare panels with soft edges, and a shine on two corners */
 .liquid-glass-pure .fx {
   position: absolute;
   inset: 0;
@@ -216,32 +217,24 @@ html, body {
   }
   function gloss() {
     var W = b.offsetWidth, H = b.offsetHeight; if (!fx || W < 60 || H < 20) return;
-    var rad = Math.min(parseFloat(getComputedStyle(b).borderTopLeftRadius) || 28, H / 2, W / 2);
-    var ring = Math.max(3, Math.min(4.5, H * .1)), pr = Math.max(2, rad - ring);
-
-    var out = '<defs>' +
-      '<clipPath id="ip"><path d="' + rr(ring, ring, W - 2 * ring, H - 2 * ring, pr) + '"/></clipPath>' +
-      '<linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity=".01"/></linearGradient>' +
-      '<linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#fff" stop-opacity=".01"/></linearGradient>' +
-      '<linearGradient id="cr" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="' + f(W * .62) + '" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".55" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
-      '<linearGradient id="tl" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="' + W + '" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".3" stop-color="#fff" stop-opacity=".6"/><stop offset=".7" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
-      '<linearGradient id="bt" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="' + W + '" y2="0"><stop offset="0" stop-color="#ff8a9a" stop-opacity="0"/><stop offset=".5" stop-color="#ff8a9a" stop-opacity=".45"/><stop offset="1" stop-color="#ff8a9a" stop-opacity="0"/></linearGradient></defs>';
-
-    /* raised inner pane: a lighter ring all round, with a thin edge line on the inside */
-    out += '<path d="' + rr(0, 0, W, H, rad) + ' ' + rr(ring, ring, W - 2 * ring, H - 2 * ring, pr) + '" fill="#ff5a6e" fill-opacity=".09" fill-rule="evenodd"/>' +
-           '<path d="' + rr(ring, ring, W - 2 * ring, H - 2 * ring, pr) + '" fill="none" stroke="#ff9aa6" stroke-opacity=".3" stroke-width=".8"/>';
-
-    /* slanted glare panels inside the pane */
-    out += '<g clip-path="url(#ip)">' +
-      '<path d="M0,0H' + f(W * .36) + 'L' + f(W * .2) + ',' + H + 'H0Z" fill="url(#g1)"/>' +
-      '<path d="M' + f(W * .77) + ',0H' + f(W * .92) + 'L' + f(W * .74) + ',' + H + 'H' + f(W * .6) + 'Z" fill="url(#g2)"/></g>';
-
-    /* shine around the top-left curve, a thin bright line along the top, a soft glow along the bottom */
-    out += '<path d="M' + f(ring * .55) + ',' + f(H * .62) + 'V' + f(rad) + 'A' + f(rad - ring * .55) + ' ' + f(rad - ring * .55) + ' 0 0 1 ' + f(rad) + ',' + f(ring * .55) + 'H' + f(W * .6) +
-           '" fill="none" stroke="url(#cr)" stroke-width="1.6" stroke-linecap="round"/>' +
-           '<rect x="' + f(rad) + '" y="' + f(ring + 1) + '" width="' + f(W - 2 * rad) + '" height="1.2" rx=".6" fill="url(#tl)"/>' +
-           '<rect x="' + f(rad) + '" y="' + f(H - ring - 2.4) + '" width="' + f(W - 2 * rad) + '" height="1.1" rx=".55" fill="url(#bt)"/>';
-
+    var rad = Math.min(parseFloat(getComputedStyle(b).borderTopLeftRadius) || 28, H / 2, W / 2), TAU = Math.PI / 180;
+    var out = '<defs><clipPath id="sh"><path d="' + rr(0, 0, W, H, rad) + '"/></clipPath>' +
+      '<linearGradient id="gt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".17"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></linearGradient>';
+    /* a glare panel: slanted, and faded at both sides so it has no hard edge */
+    function band(id, t0, t1, b0, b1, op) {
+      var x0 = Math.min(t0, b0), x1 = Math.max(t1, b1);
+      out += '<linearGradient id="' + id + '" gradientUnits="userSpaceOnUse" x1="' + f(x0) + '" y1="0" x2="' + f(x1) + '" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity="' + op + '"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>';
+      return '<path d="M' + f(t0) + ',0L' + f(t1) + ',0L' + f(b1) + ',' + H + 'L' + f(b0) + ',' + H + 'Z" fill="url(#' + id + ')"/>';
+    }
+    var body = band('ga', W * .2, W * .52, W * .0, W * .3, .13) + band('gb', W * .72, W * .92, W * .56, W * .74, .09);
+    /* shine on the top-left and bottom-right curves, fading out along the edge */
+    var r1 = rad - 1.6, ax = rad + r1 * Math.cos(200 * TAU), ay = rad + r1 * Math.sin(200 * TAU);
+    var bx = W - rad + r1 * Math.cos(10 * TAU), by = H - rad + r1 * Math.sin(10 * TAU);
+    out += '<linearGradient id="c1" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="' + f(W * .5) + '" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>' +
+           '<linearGradient id="c2" gradientUnits="userSpaceOnUse" x1="' + W + '" y1="0" x2="' + f(W * .55) + '" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>';
+    out += '<g clip-path="url(#sh)"><rect width="' + W + '" height="' + f(H * .6) + '" fill="url(#gt)"/>' + body + '</g>' +
+           '<path d="M' + f(ax) + ',' + f(ay) + 'A' + f(r1) + ' ' + f(r1) + ' 0 0 1 ' + f(rad) + ',1.6H' + f(W * .5) + '" fill="none" stroke="url(#c1)" stroke-width="1.5" stroke-linecap="round"/>' +
+           '<path d="M' + f(bx) + ',' + f(by) + 'A' + f(r1) + ' ' + f(r1) + ' 0 0 1 ' + f(W - rad) + ',' + f(H - 1.6) + 'H' + f(W * .55) + '" fill="none" stroke="url(#c2)" stroke-width="1.2" stroke-linecap="round"/>';
     fx.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '">' + out + '</svg>';
   }
   gloss();
